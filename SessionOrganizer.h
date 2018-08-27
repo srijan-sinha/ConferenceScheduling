@@ -60,7 +60,19 @@ public:
      * Organize the papers according to some algorithm.
      */
     void organizePapers();
-    
+
+
+    /**
+     * Generates a random scheduling for the conferene.
+     */
+    void randomState();
+
+
+    /**
+     * Compares the heuristic of all possible neighbours and updates to the best
+     */
+    void findAndUpdateNeighbour();
+ 
     
     /**
      * Get the distance matrix.

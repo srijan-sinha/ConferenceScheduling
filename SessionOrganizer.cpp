@@ -36,6 +36,17 @@ void SessionOrganizer::organizePapers ( )
             }
         }
     }
+
+}
+
+void SessionOrganizer::randomState ( )
+{
+
+}
+
+void SessionOrganizer::findAndUpdateNeighbour ( )
+{
+    
 }
 
 void SessionOrganizer::readInInputFile ( string filename )
