@@ -43,6 +43,7 @@ void SessionOrganizer::organizePapers ( )
     
     randomState();
     conference->setGoodness(scoreOrganization());
+    findAndUpdateNeighbour();
     
 }
 
@@ -77,15 +78,58 @@ void SessionOrganizer::swap( int sessionIndex1, int paperIndex1, int sessionInde
 {
     int trackIndex1 = sessionIndex1 / sessionsInTrack;
     int trackIndex2 = sessionIndex2 / sessionsInTrack;
-    int paper1 = conference->getTrack(trackIndex1).getSession(sessionIndex1).getPaper(paperIndex1);
-    int paper2 = conference->getTrack(trackIndex2).getSession(sessionIndex2).getPaper(paperIndex2);
+    int sessIndex1 = sessionIndex1 % sessionsInTrack;
+    int sessIndex2 = sessionIndex2 % sessionsInTrack;
+    int paper1 = conference->getTrack(trackIndex1).getSession(sessIndex1).getPaper(paperIndex1);
+    int paper2 = conference->getTrack(trackIndex2).getSession(sessIndex2).getPaper(paperIndex2);
     conference->setPaper(trackIndex1, sessionIndex1, paperIndex1,paper2);
     conference->setPaper(trackIndex2, sessionIndex2, paperIndex2, paper1);
 }
 
-int SessionOrganizer::findGoodness( int sessionIndex1, int paperIndex1, int sessionIndex2, int paperIndex2 )
+double SessionOrganizer::findGoodness( int sessionIndex1, int paperIndex1, int sessionIndex2, int paperIndex2 )
 {
-    
+    int trackIndex1 = sessionIndex1 / sessionsInTrack;
+    int trackIndex2 = sessionIndex2 / sessionsInTrack;
+    int sessIndex1 = sessionIndex1 % sessionsInTrack;
+    int sessIndex2 = sessionIndex2 % sessionsInTrack;
+    int paper1 = conference->getTrack(trackIndex1).getSession(sessIndex1).getPaper(paperIndex1);
+    int paper2 = conference->getTrack(trackIndex2).getSession(sessIndex2).getPaper(paperIndex2
+
+    double good = conference->getGoodness();
+    good -= findLikeliness(trackIndex1, sessIndex1, paper1);
+    good -= findLikeliness(trackIndex2, sessIndex2, paper2);
+    good -= findDistance(trackIndex2, sessIndex2, paper1);
+    good -= findDistance(trackIndex1, sessIndex1, paper2);
+    good += 2 * distanceMatrix[paper1][paper2];
+
+    good += findLikeliness(trackIndex2, sessIndex2, paper1);
+    good += findLikeliness(trackIndex1, sessIndex1, paper2);
+    good += findDistance(trackIndex1, sessIndex1, paper1);
+    good += findDistance(trackIndex2, sessIndex2, paper2);
+    good -= 2 * (1 - distanceMatrix[paper1][paper2]);
+
+    return good;
+
+}
+
+int SessionOrganizer::findLikeliness(int track, int session, int paperId)
+{
+    double sum = 0;
+    for(int i = 0; i < papersInSession; i++)
+    {
+        sum += 1 - distanceMatrix[paperId][conference->getTrack(track).getSession(session).getPaper(i)];
+    }
+    return sum;
+}
+
+int SessionOrganizer::findDistance(int track, int session, int paperId)
+{
+    double sum = 0;
+    for(int i = 0; i < papersInSession; i++)
+    {
+        sum += distanceMatrix[paperId][conference->getTrack(track).getSession(session).getPaper(i)];
+    }
+    return sum;
 }
 
 bool SessionOrganizer::findAndUpdateNeighbour ()
@@ -100,8 +144,8 @@ bool SessionOrganizer::findAndUpdateNeighbour ()
         for ( int j = i+1; j < totalSessions; j++ ){
             for ( int k = 0; k < papersInSession; k++ ){
                 for (int l = 0; l < papersInSession; l++){
-                    swap(i,k,j,l);
                     int newGoodness = findGoodness(i,k,j,l);
+                    swap(i,k,j,l);
                     if (newGoodness >= conference->getGoodness())
                     {
                         bestNeighbourIndex[0] = i ;

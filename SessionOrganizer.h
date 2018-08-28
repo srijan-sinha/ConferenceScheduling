@@ -70,9 +70,26 @@ public:
 
 
     /**
-     * Swaps two papers
+     * Swaps two papers.
      */
     void swap(int sessionIndex1, int paperIndex1, int sessionIndex2, int paperIndex2);
+
+
+    /**
+     * Finds goodness of the schedule if the swap is carried out.
+     */
+    double findGoodness(int sessionIndex1, int paperIndex1, int sessionIndex2, int paperIndex2);
+
+
+    /**
+     * Finds the likeliness of a given paper with a given session.
+     */
+    double findLikeliness(int track, int session, int paperId);
+
+    /**
+     * Finds the distance of a given paper from a given session.
+     */
+    double findDistance(int track, int session, int paperId);
 
 
     /**
