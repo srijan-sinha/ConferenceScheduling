@@ -21,7 +21,7 @@ private:
     Track *tracks;
 
     // The number of parallel tracks.
-    int parallelTracks;
+    int totalTracks;
 
     // The number of sessions in a track.
     int sessionsInTrack;
@@ -34,11 +34,11 @@ public:
     /**
      * Constructor for Conference.
      * 
-     * @param parallelTracks is the number of parallel tracks.
+     * @param totalTracks is the number of total tracks.
      * @param sessionsInTrack is the number of sessions in a track.
      * @param papersInSession is the number of papers in a session.
      */
-    Conference(int parallelTracks, int sessionsInTrack, int papersInSession);
+    Conference(int totalTracks, int sessionsInTrack, int papersInSession);
     
     
     // The array of index of like and dislike.
@@ -51,14 +51,14 @@ public:
      * @param sessionsInTrack is the number of sessions in a track.
      * @param papersInSession is the number of papers in a session.
      */
-    void initTracks(int parallelTracks, int sessionsInTrack, int papersInSession);
+    void initTracks(int totalTracks, int sessionsInTrack, int papersInSession);
     
     
     /**
-     * Gets the number of parallel tracks.
-     * @return the number of parallel tracks.
+     * Gets the number of total tracks.
+     * @return the number of total tracks.
      */
-    int getParallelTracks();
+    int getTotalTracks();
     
     
     /**

@@ -8,23 +8,23 @@
 
 Conference::Conference ( )
 {
-    this->parallelTracks = 0;
+    this->totalTracks = 0;
     this->sessionsInTrack = 0;
     this->papersInSession = 0;
 }
 
-Conference::Conference ( int parallelTracks, int sessionsInTrack, int papersInSession )
+Conference::Conference ( int totalTracks, int sessionsInTrack, int papersInSession )
 {
-    this->parallelTracks = parallelTracks;
+    this->totalTracks = totalTracks;
     this->sessionsInTrack = sessionsInTrack;
     this->papersInSession = papersInSession;
-    initTracks ( parallelTracks, sessionsInTrack, papersInSession );
+    initTracks ( totalTracks, sessionsInTrack, papersInSession );
 }
 
-void Conference::initTracks ( int parallelTracks, int sessionsInTrack, int papersInSession )
+void Conference::initTracks ( int totalTracks, int sessionsInTrack, int papersInSession )
 {
-    tracks = ( Track * ) malloc ( sizeof (Track ) * parallelTracks );
-    for ( int i = 0; i < parallelTracks; i++ )
+    tracks = ( Track * ) malloc ( sizeof (Track ) * totalTracks );
+    for ( int i = 0; i < totalTracks; i++ )
     {
         Track tempTrack ( sessionsInTrack );
         for ( int j = 0; j < sessionsInTrack; j++ )
@@ -36,9 +36,9 @@ void Conference::initTracks ( int parallelTracks, int sessionsInTrack, int paper
     }
 }
 
-int Conference::getParallelTracks ( )
+int Conference::getTotalTracks ( )
 {
-    return parallelTracks;
+    return totalTracks;
 }
 
 int Conference::getSessionsInTrack ( )
@@ -53,7 +53,7 @@ int Conference::getPapersInSession ( )
 
 Track Conference::getTrack ( int index )
 {
-    if ( index < parallelTracks )
+    if ( index < totalTracks )
     {
         return tracks[index];
     }
@@ -66,7 +66,7 @@ Track Conference::getTrack ( int index )
 
 void Conference::setPaper ( int trackIndex, int sessionIndex, int paperIndex, int paperId )
 {
-    if ( this->parallelTracks > trackIndex )
+    if ( this->totalTracks > trackIndex )
     {
         Track curTrack = tracks[trackIndex];
         curTrack.setPaper ( sessionIndex, paperIndex, paperId );
@@ -85,13 +85,13 @@ void Conference::printConference (char * filename )
 
     for ( int i = 0; i < sessionsInTrack; i++ )
     {
-        for ( int j = 0; j < parallelTracks; j++ )
+        for ( int j = 0; j < totalTracks; j++ )
         {
             for ( int k = 0; k < papersInSession; k++ )
             {
                 ofile<< tracks[j].getSession ( i ).getPaper ( k ) << " ";
             }
-            if ( j != parallelTracks - 1 )
+            if ( j != totalTracks - 1 )
             {
                 ofile<<"| ";
             }

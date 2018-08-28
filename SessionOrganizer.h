@@ -32,7 +32,7 @@ class SessionOrganizer {
 private:
     double ** distanceMatrix;
 
-    int parallelTracks ;
+    int totalTracks ;
     int papersInSession ;
     int sessionsInTrack ;
 

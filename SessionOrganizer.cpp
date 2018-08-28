@@ -10,7 +10,7 @@
 
 SessionOrganizer::SessionOrganizer ( )
 {
-    parallelTracks = 0;
+    totalTracks = 0;
     papersInSession = 0;
     sessionsInTrack = 0;
     processingTimeInMinutes = 0;
@@ -20,7 +20,7 @@ SessionOrganizer::SessionOrganizer ( )
 SessionOrganizer::SessionOrganizer ( string filename )
 {
     readInInputFile ( filename );
-    conference = new Conference ( parallelTracks, sessionsInTrack, papersInSession );
+    conference = new Conference ( totalTracks, sessionsInTrack, papersInSession );
 }
 
 void SessionOrganizer::organizePapers ( )
@@ -28,25 +28,25 @@ void SessionOrganizer::organizePapers ( )
     
     // initialisation with no optimisation
 
-    int paperCounter = 0;
-    for ( int i = 0; i < conference->getSessionsInTrack ( ); i++ )
-    {
-        for ( int j = 0; j < conference->getParallelTracks ( ); j++ )
-        {
-            for ( int k = 0; k < conference->getPapersInSession ( ); k++ )
-            {
-                conference->setPaper ( j, i, k, paperCounter);
-                paperCounter++;
-            }
-        }
-    }
+    // int paperCounter = 0;
+    // for ( int i = 0; i < conference->getSessionsInTrack ( ); i++ )
+    // {
+    //     for ( int j = 0; j < conference->getTotalTracks ( ); j++ )
+    //     {
+    //         for ( int k = 0; k < conference->getPapersInSession ( ); k++ )
+    //         {
+    //             conference->setPaper ( j, i, k, paperCounter);
+    //             paperCounter++;
+    //         }
+    //     }
+    // }
     
-    // randomState();
+    randomState();
 }
 
 void SessionOrganizer::randomState ()
 {
-    int size = parallelTracks * sessionsInTrack * papersInSession ;
+    int size = totalTracks * sessionsInTrack * papersInSession ;
     int random = 0;
     int trackCount = 0;
     int sessionCount = 0;
@@ -73,7 +73,7 @@ void SessionOrganizer::randomState ()
 
 void SessionOrganizer::findAndUpdateNeighbour ()
 {
-    
+   
 }
 
 void SessionOrganizer::readInInputFile ( string filename )
@@ -104,8 +104,8 @@ void SessionOrganizer::readInInputFile ( string filename )
 
     processingTimeInMinutes = atof ( lines[0].c_str () );
     papersInSession = atoi ( lines[1].c_str () );
-    parallelTracks = atoi ( lines[2].c_str () );
-    sessionsInTrack = atoi ( lines[3].c_str () );
+    sessionsInTrack = atoi ( lines[2].c_str () );
+    totalTracks = atoi ( lines[3].c_str () );
     tradeoffCoefficient = atof ( lines[4].c_str () );
 
     int n = lines.size ( ) - 5;
@@ -130,7 +130,7 @@ void SessionOrganizer::readInInputFile ( string filename )
     distanceMatrix = tempDistanceMatrix;
 
     int numberOfPapers = n;
-    int slots = parallelTracks * papersInSession*sessionsInTrack;
+    int slots = totalTracks * papersInSession*sessionsInTrack;
     if ( slots != numberOfPapers )
     {
         cout << "More papers than slots available! slots:" << slots << " num papers:" << numberOfPapers << endl;
@@ -140,10 +140,10 @@ void SessionOrganizer::readInInputFile ( string filename )
 
 void SessionOrganizer::compatibility  (  ) 
 {
-    int len = parallelTracks * sessionsInTrack;
-    cout << "Total sessions: " << len << endl;
-    cout << "Sessions in Track: " << sessionsInTrack << endl;
-    cout << "Num Tracks: " << parallelTracks << endl;
+    int len = totalTracks * sessionsInTrack;
+    // cout << "Total sessions: " << len << endl;
+    // cout << "Sessions in Track: " << sessionsInTrack << endl;
+    // cout << "Num Tracks: " << totalTracks << endl;
     int track = 0;
     int session = 0;
     int pairTrack1 = 0;
@@ -165,7 +165,7 @@ void SessionOrganizer::compatibility  (  )
             {
                 track = i / sessionsInTrack;
                 session = i % sessionsInTrack;
-                cout<< "Call of likeliness for track: " << track << " and session: " << session << endl;
+                // cout<< "Call of likeliness for track: " << track << " and session: " << session << endl;
                 tempDistanceMatrix[i][j] = likeliness(track, session);
             }
             else
@@ -174,7 +174,7 @@ void SessionOrganizer::compatibility  (  )
                 pairSession1 = i % sessionsInTrack;
                 pairTrack2 = j / sessionsInTrack;
                 pairSession2 = j % sessionsInTrack;
-                cout<< "Call of conflict for track1: " << pairTrack1 << " session1: " << pairSession1 << " track2: " << pairTrack2 << " session2: " << pairSession2 << endl;
+                // cout<< "Call of conflict for track1: " << pairTrack1 << " session1: " << pairSession1 << " track2: " << pairTrack2 << " session2: " << pairSession2 << endl;
                 tempDistanceMatrix[i][j] = conflict(pairTrack1, pairSession1, pairTrack2, pairSession2);
             }
         }
@@ -183,7 +183,7 @@ void SessionOrganizer::compatibility  (  )
     {
         for (int j = 0; j < len; j++)
         {
-            cout << "i : " << i << " j : " << j << " value : " << tempDistanceMatrix[i][j]<< endl;
+            // cout << "i : " << i << " j : " << j << " value : " << tempDistanceMatrix[i][j]<< endl;
         }
     }
     conference->distanceMatrix = tempDistanceMatrix;
@@ -200,7 +200,7 @@ int SessionOrganizer::likeliness( int track, int session )
         {
             paper1 = conference->getTrack(track).getSession(session).getPaper(i);
             paper2 = conference->getTrack(track).getSession(session).getPaper(j);
-            cout << "Paper1: " << paper1 << " Paper2: " << paper2 << endl;
+            // cout << "Paper1: " << paper1 << " Paper2: " << paper2 << endl;
             like += 1 - distanceMatrix[paper1][paper2];
         }
     }
@@ -218,7 +218,7 @@ int SessionOrganizer::conflict( int track1, int session1, int track2, int sessio
         {
             paper1 = conference->getTrack(track1).getSession(session1).getPaper(i);
             paper2 = conference->getTrack(track2).getSession(session2).getPaper(j);
-            cout << "Paper1: " << paper1 << " Paper2: " << paper2 << endl;
+            // cout << "Paper1: " << paper1 << " Paper2: " << paper2 << endl;
             conflict += distanceMatrix[paper1][paper2];
         }
     }
@@ -239,7 +239,7 @@ double SessionOrganizer::scoreOrganization ( )
 {
     // Sum of pairwise similarities per session.
     double score1 = 0.0;
-    for ( int i = 0; i < conference->getParallelTracks ( ); i++ )
+    for ( int i = 0; i < conference->getTotalTracks ( ); i++ )
     {
         Track tmpTrack = conference->getTrack ( i );
         for ( int j = 0; j < tmpTrack.getNumberOfSessions ( ); j++ )
@@ -259,7 +259,7 @@ double SessionOrganizer::scoreOrganization ( )
 
     // Sum of distances for competing papers.
     double score2 = 0.0;
-    for ( int i = 0; i < conference->getParallelTracks ( ); i++ )
+    for ( int i = 0; i < conference->getTotalTracks ( ); i++ )
     {
         Track tmpTrack1 = conference->getTrack ( i );
         for ( int j = 0; j < tmpTrack1.getNumberOfSessions ( ); j++ )
@@ -270,10 +270,10 @@ double SessionOrganizer::scoreOrganization ( )
                 int index1 = tmpSession1.getPaper ( k );
 
                 // Get competing papers.
-                for ( int l = i + 1; l < conference->getParallelTracks ( ); l++ )
+                for ( int l = j + 1; l < tmpTrack1.getNumberOfSessions ( ); l++ )
                 {
-                    Track tmpTrack2 = conference->getTrack ( l );
-                    Session tmpSession2 = tmpTrack2.getSession ( j );
+                    // Track tmpTrack2 = conference->getTrack ( l );
+                    Session tmpSession2 = tmpTrack1.getSession ( l );
                     for ( int m = 0; m < tmpSession2.getNumberOfPapers ( ); m++ )
                     {
                         int index2 = tmpSession2.getPaper ( m );
