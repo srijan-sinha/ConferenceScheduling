@@ -78,6 +78,7 @@ void Conference::setPaper ( int trackIndex, int sessionIndex, int paperIndex, in
     }
 }
 
+
 void Conference::printConference (char * filename )
 {
     ofstream ofile(filename);

@@ -11,6 +11,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <ctime>
 
 
 #include "Conference.h"
@@ -80,7 +81,24 @@ public:
      */
     double** getDistanceMatrix();
     
-    
+
+    /**
+     * Sets a 2D array for the likes and dislikes.
+    */
+    void compatibility();
+
+
+    /**
+     * Finds the likeliness for a given session
+    */
+    int likeliness(int track, int session);
+
+
+    /**
+     * Finds the conflict between two sessions
+    */
+    int conflict(int track1, int session1, int track2, int session2);
+
     /**
      * Score the organization.
      * @return the score.

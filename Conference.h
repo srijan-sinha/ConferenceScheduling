@@ -16,6 +16,7 @@ using namespace std;
 
 class Conference {
 private:
+
     // The array of tracks.
     Track *tracks;
 
@@ -38,6 +39,10 @@ public:
      * @param papersInSession is the number of papers in a session.
      */
     Conference(int parallelTracks, int sessionsInTrack, int papersInSession);
+    
+    
+    // The array of index of like and dislike.
+    double ** distanceMatrix;
     
     
     /**
@@ -87,7 +92,7 @@ public:
      */
     void setPaper(int trackIndex, int sessionIndex, int paperIndex, int paperId);
     
-    
+
     void printConference(char *);
 };
 

@@ -7,6 +7,7 @@
 #include "SessionOrganizer.h"
 #include "Util.h"
 
+
 SessionOrganizer::SessionOrganizer ( )
 {
     parallelTracks = 0;
@@ -24,6 +25,9 @@ SessionOrganizer::SessionOrganizer ( string filename )
 
 void SessionOrganizer::organizePapers ( )
 {
+    
+    // initialisation with no optimisation
+
     int paperCounter = 0;
     for ( int i = 0; i < conference->getSessionsInTrack ( ); i++ )
     {
@@ -31,20 +35,43 @@ void SessionOrganizer::organizePapers ( )
         {
             for ( int k = 0; k < conference->getPapersInSession ( ); k++ )
             {
-                conference->setPaper ( j, i, k, paperCounter );
+                conference->setPaper ( j, i, k, paperCounter);
                 paperCounter++;
             }
         }
     }
-
+    
+    // randomState();
 }
 
-void SessionOrganizer::randomState ( )
+void SessionOrganizer::randomState ()
 {
+    int size = parallelTracks * sessionsInTrack * papersInSession ;
+    int random = 0;
+    int trackCount = 0;
+    int sessionCount = 0;
+    int papersCount = 0;
+    int counter = 0;
 
+    vector<int> papers;
+    for (int i = 0; i < size; i++){
+        papers.push_back(i);
+    }  
+    
+    while(papers.size()!=0){
+        srand(time(0));
+        random = rand() % (papers.size()); 
+        trackCount = counter  / ( sessionsInTrack * papersInSession);
+        sessionCount = counter / ( papersInSession ) % sessionsInTrack;
+        papersCount =  counter % papersInSession;
+        conference->setPaper(trackCount, sessionCount, papersCount,papers.at(random)); 
+        papers.erase(papers.begin() + random);
+        counter ++;
+    }    
+    compatibility();
 }
 
-void SessionOrganizer::findAndUpdateNeighbour ( )
+void SessionOrganizer::findAndUpdateNeighbour ()
 {
     
 }
@@ -109,6 +136,93 @@ void SessionOrganizer::readInInputFile ( string filename )
         cout << "More papers than slots available! slots:" << slots << " num papers:" << numberOfPapers << endl;
         exit ( 0 );
     }
+}
+
+void SessionOrganizer::compatibility  (  ) 
+{
+    int len = parallelTracks * sessionsInTrack;
+    cout << "Total sessions: " << len << endl;
+    cout << "Sessions in Track: " << sessionsInTrack << endl;
+    cout << "Num Tracks: " << parallelTracks << endl;
+    int track = 0;
+    int session = 0;
+    int pairTrack1 = 0;
+    int pairTrack2 = 0;
+    int pairSession1 = 0;
+    int pairSession2 = 0;
+    double ** tempDistanceMatrix = new double*[len];
+    for(int i = 0; i < len; i++)
+    {
+        tempDistanceMatrix[i] = new double[len];
+    }
+
+
+    for(int i = 0; i < len; i++)
+    {
+        for(int j = 0; j  < len; j++)
+        {
+            if(i == j)
+            {
+                track = i / sessionsInTrack;
+                session = i % sessionsInTrack;
+                cout<< "Call of likeliness for track: " << track << " and session: " << session << endl;
+                tempDistanceMatrix[i][j] = likeliness(track, session);
+            }
+            else
+            {
+                pairTrack1 = i / sessionsInTrack;
+                pairSession1 = i % sessionsInTrack;
+                pairTrack2 = j / sessionsInTrack;
+                pairSession2 = j % sessionsInTrack;
+                cout<< "Call of conflict for track1: " << pairTrack1 << " session1: " << pairSession1 << " track2: " << pairTrack2 << " session2: " << pairSession2 << endl;
+                tempDistanceMatrix[i][j] = conflict(pairTrack1, pairSession1, pairTrack2, pairSession2);
+            }
+        }
+    }
+    for (int i = 0; i < len; i++)
+    {
+        for (int j = 0; j < len; j++)
+        {
+            cout << "i : " << i << " j : " << j << " value : " << tempDistanceMatrix[i][j]<< endl;
+        }
+    }
+    conference->distanceMatrix = tempDistanceMatrix;
+}
+
+int SessionOrganizer::likeliness( int track, int session )
+{
+    int like = 0;
+    int paper1 = 0;
+    int paper2 = 0;
+    for(int i = 0; i < papersInSession; i++)
+    {
+        for(int j = i+1; j < papersInSession; j++)
+        {
+            paper1 = conference->getTrack(track).getSession(session).getPaper(i);
+            paper2 = conference->getTrack(track).getSession(session).getPaper(j);
+            cout << "Paper1: " << paper1 << " Paper2: " << paper2 << endl;
+            like += 1 - distanceMatrix[paper1][paper2];
+        }
+    }
+    return like;
+}
+
+int SessionOrganizer::conflict( int track1, int session1, int track2, int session2 )
+{
+    int conflict = 0;
+    int paper1 = 0;
+    int paper2 = 0;
+    for(int i = 0; i < papersInSession; i++)
+    {
+        for(int j = 0; j < papersInSession; j++)
+        {
+            paper1 = conference->getTrack(track1).getSession(session1).getPaper(i);
+            paper2 = conference->getTrack(track2).getSession(session2).getPaper(j);
+            cout << "Paper1: " << paper1 << " Paper2: " << paper2 << endl;
+            conflict += distanceMatrix[paper1][paper2];
+        }
+    }
+    return conflict;
 }
 
 double** SessionOrganizer::getDistanceMatrix ( )
