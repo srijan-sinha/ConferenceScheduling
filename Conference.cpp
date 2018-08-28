@@ -78,6 +78,15 @@ void Conference::setPaper ( int trackIndex, int sessionIndex, int paperIndex, in
     }
 }
 
+double Conference::getGoodness()
+{
+    return goodness;
+}
+
+void Conference::setGoodness(double value)
+{
+    goodness = value;
+}
 
 void Conference::printConference (char * filename )
 {

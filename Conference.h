@@ -28,6 +28,10 @@ private:
 
     // The number of papers in a session.
     int papersInSession;
+
+    // The goodness of the schedule
+    double goodness;
+
 public:
     Conference();
     
@@ -81,8 +85,8 @@ public:
      * @return the track
      */
     Track getTrack(int index);
-    
-    
+
+
     /**
      * Sets the paper in the specified slot to the given paper id.
      * @param trackIndex is the track index.
@@ -92,6 +96,18 @@ public:
      */
     void setPaper(int trackIndex, int sessionIndex, int paperIndex, int paperId);
     
+
+    /**
+     * Returns the goodness of the conference schedule.
+     */
+    double getGoodness();
+
+
+    /**
+     * Sets the goodness of the schedule to the given value.
+     */
+    void setGoodness(double value);
+
 
     void printConference(char *);
 };

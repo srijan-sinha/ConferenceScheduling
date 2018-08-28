@@ -42,6 +42,8 @@ void SessionOrganizer::organizePapers ( )
     // }
     
     randomState();
+    conference->setGoodness(scoreOrganization());
+    
 }
 
 void SessionOrganizer::randomState ()
@@ -71,9 +73,56 @@ void SessionOrganizer::randomState ()
     compatibility();
 }
 
-void SessionOrganizer::findAndUpdateNeighbour ()
+void SessionOrganizer::swap( int sessionIndex1, int paperIndex1, int sessionIndex2, int paperIndex2 )
 {
-   
+    int trackIndex1 = sessionIndex1 / sessionsInTrack;
+    int trackIndex2 = sessionIndex2 / sessionsInTrack;
+    int paper1 = conference->getTrack(trackIndex1).getSession(sessionIndex1).getPaper(paperIndex1);
+    int paper2 = conference->getTrack(trackIndex2).getSession(sessionIndex2).getPaper(paperIndex2);
+    conference->setPaper(trackIndex1, sessionIndex1, paperIndex1,paper2);
+    conference->setPaper(trackIndex2, sessionIndex2, paperIndex2, paper1);
+}
+
+int SessionOrganizer::findGoodness( int sessionIndex1, int paperIndex1, int sessionIndex2, int paperIndex2 )
+{
+    
+}
+
+bool SessionOrganizer::findAndUpdateNeighbour ()
+{
+    int totalSessions = totalTracks * sessionsInTrack;
+    int bestNeighbourIndex[5];
+    for (int i = 0; i < 4; i++){
+       bestNeighbourIndex[i] = -1;
+    }
+
+    for ( int i = 0; i < totalSessions; i++ ){
+        for ( int j = i+1; j < totalSessions; j++ ){
+            for ( int k = 0; k < papersInSession; k++ ){
+                for (int l = 0; l < papersInSession; l++){
+                    swap(i,k,j,l);
+                    int newGoodness = findGoodness(i,k,j,l);
+                    if (newGoodness >= conference->getGoodness())
+                    {
+                        bestNeighbourIndex[0] = i ;
+                        bestNeighbourIndex[1] = k ;
+                        bestNeighbourIndex[2] = j ;
+                        bestNeighbourIndex[3] = l ;
+                        bestNeighbourIndex[4] = newGoodness ;
+                    }
+                    swap(i,k,j,l);
+                }
+            }
+        }
+    }
+    if(bestNeighbourIndex[0] != -1)
+    {
+        swap(bestNeighbourIndex[0], bestNeighbourIndex[1], bestNeighbourIndex[2], bestNeighbourIndex[3]);
+        conference->setGoodness(bestNeighbourIndex[4]);
+        return true;
+    }
+    else
+        return false;
 }
 
 void SessionOrganizer::readInInputFile ( string filename )

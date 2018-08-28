@@ -70,9 +70,15 @@ public:
 
 
     /**
+     * Swaps two papers
+     */
+    void swap(int sessionIndex1, int paperIndex1, int sessionIndex2, int paperIndex2);
+
+
+    /**
      * Compares the heuristic of all possible neighbours and updates to the best
      */
-    void findAndUpdateNeighbour();
+    bool findAndUpdateNeighbour();
  
     
     /**
