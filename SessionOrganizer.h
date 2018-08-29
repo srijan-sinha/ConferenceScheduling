@@ -12,6 +12,8 @@
 #include <fstream>
 #include <vector>
 #include <ctime>
+#include <cmath>
+#include <algorithm>
 
 
 #include "Conference.h"
@@ -61,6 +63,31 @@ public:
      * Organize the papers according to some algorithm.
      */
     void organizePapers();
+
+
+       /**
+     * Generates a greedy random scheduling for the conference.
+     */
+    void greedyRandomState();
+
+
+    /**
+     * Finds the first index in the Distance Matrix that has min difference from the
+     * given paper
+     */
+    int FindIndex(double a, int index);
+
+
+    /**
+     * Compares two doubles.
+     */
+    bool DoubleCompare(double a, double b);
+
+
+    /**
+     * First index that isn't yet scheduled.
+     */
+    int FirstFreeIndex (int arr[]);
 
 
     /**

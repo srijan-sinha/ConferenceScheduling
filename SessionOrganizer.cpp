@@ -28,61 +28,134 @@ void SessionOrganizer::organizePapers ( )
     
     // initialisation with no optimisation
 
-    // int paperCounter = 0;
-    // for ( int i = 0; i < conference->getSessionsInTrack ( ); i++ )
+    int paperCounter = 0;
+    // for ( int i = 0; i < conference->getTotalTracks ( ); i++ )
     // {
-    //     for ( int j = 0; j < conference->getTotalTracks ( ); j++ )
+    //     for ( int j = 0; j < conference->getSessionsInTrack ( ); j++ )
     //     {
     //         for ( int k = 0; k < conference->getPapersInSession ( ); k++ )
     //         {
-    //             conference->setPaper ( j, i, k, paperCounter);
+    //             conference->setPaper ( i, j, k, paperCounter);
     //             paperCounter++;
     //         }
     //     }
     // }
-    
-    randomState();
-    conference->setGoodness(scoreOrganization());
-    cout << "First random state : ";
-    conference->print();
-    cout << "Score organisation original: " << scoreOrganization() << endl;
-    int x = 0;
-    while (findAndUpdateNeighbour() && x < 25)
+
+
+    double maxGoodness = 0;
+    int numStarts = 200;
+    int restarts = 0;
+    double goodness = 0.0;
+    while(numStarts > restarts)
     {
-        x ++ ;
+        // greedyRandomState();
+        randomState();
+        conference->setGoodness(scoreOrganization());
+        if(restarts == 0)
+        {
+            cout << "First random state : "<< endl;
+            conference->print();
+        }
+        cout << "Goodness new random state: " << scoreOrganization();
+        goodness = scoreOrganization(); 
+        // cout << " Goodness : " << goodness << endl;
+        int counter = 0;
+        // cout << " Conference Goodness : " << conference->getGoodness() << endl;
+        while (findAndUpdateNeighbour() && counter < 15)
+        {
+            // cout << " Conference Goodness : " << conference->getGoodness() << endl;
+            if(abs(goodness - conference->getGoodness()) < 0.00001)
+            {
+                counter++;
+            }
+            else
+            {
+                // cout << " Goodness 1 : " << goodness;
+                counter = 0;
+                goodness = conference->getGoodness();
+                // cout << " Goodness 2 : " << goodness;
+            }
+        }
+
+        if(goodness > maxGoodness)
+            maxGoodness = goodness;
+        cout << " Optimum new random state: " << goodness << endl;
+        restarts++;
     }
-    cout << "Updated state : ";
-    conference->print();
-    cout << endl;
+    cout << "Overall Goodness: " << maxGoodness << endl;
     
 }
 
-// void SessionOrganizer::GreedyRandomState()
-// {
-//     int size = totalTracks * sessionsInTrack * papersInSession ;
-//     int papers[size];
-//     for (int i = 0; i < size; i++){
-//         papers[i] = -1;
-//     } 
+void SessionOrganizer::greedyRandomState()
+{
+    int size = totalTracks * sessionsInTrack * papersInSession ;
+    int papers[size];
+    for (int i = 0; i < size; i++){
+        papers[i] = -1;
+    } 
+
+    int currentSession = 0;
+    int index = 0;
+
+    while (currentSession < sessionsInTrack)
+    {
+        index = FirstFreeIndex(papers);
+        double sortedPaperIndex[size];
+        for (int i = 0; i < size; i++){
+            sortedPaperIndex[i] = distanceMatrix[index][i];
+        }
+
+        // sort(begin(sortedPaperIndex), end(sortedPaperIndex));
+
+        // int n = sizeof(sortedPaperIndex) / sizeof(sortedPaperIndex[0]);
+        // sort(sortedPaperIndex, sortedPaperIndex + n); //sorted index matrix of paper[index]
+
+        int paperscount = 1; // ensures the specified number of papers in a session
+        while (paperscount < papersInSession)
+        {
+            for (int i = 0 ; i < size; i ++ )
+            {
+                if (sortedPaperIndex[i] != 0) 
+                {
+                    int index = FindIndex(sortedPaperIndex[i], index);
+                    if (index == -1) { cout << " Some double comparision realted error." ;}  
+                    if (papers[index] == -1)
+                    {
+                        paperscount ++;
+                        papers[index] = currentSession;
+                    }
+                }
+            }
+        }
+        currentSession ++ ;
+    }
     
-//     int paperIndex = 0;
-//     int sessionNumber = 0;
-//     while (sessionNumber < sessionsInTrack && papers[index] == -1){
-//         int indexSession[sessionsInTrack];
-//         for (int i = 0; i < sessionsInTrack; i++){
-//             indexSession[i] = -1;
-//         }
-//         int sortedPaperIndex[papersInSession];
-//         for (int i = 0; i < papersInSession; i++){
-//             sortedPaperIndex[i] = distanceMatrix[i];
-//         }
-//         int n = sizeof(sortedPaperIndex)/sizeof(sortedPaperIndex[0]);
-//         sort(sortedPaperIndex, sortedPaperIndex + n);
+}
 
-//     }
+int SessionOrganizer::FindIndex(double a, int index)
+{
+    // int n = arr->size();
+    int size = totalTracks * sessionsInTrack * papersInSession ;
+    for (int i = 0; i < size ; i++)
+    {
+        if (DoubleCompare (a,distanceMatrix[index][i])) {return i;}
+    }
+    return -1;
+}
 
+bool SessionOrganizer::DoubleCompare(double a, double b)
+{
+    if ( abs ( a - b ) < 0.0000001 ) {return true;}
+    return false;
+}
 
-// }
+int SessionOrganizer::FirstFreeIndex(int arr[])
+{
+    int i = 0;
+    int size = totalTracks * sessionsInTrack * papersInSession ;
+    while (i < size && arr[i] != -1){ i++ ;}
+    return i ;
+}
 
 void SessionOrganizer::randomState ()
 {
@@ -99,10 +172,11 @@ void SessionOrganizer::randomState ()
     }  
     
     while(papers.size()!=0){
-        srand(time(0));
+        // srand(time(0));
         random = rand() % (papers.size()); 
+        // cout << "Counter : " << counter << endl ;
         trackCount = counter  / ( sessionsInTrack * papersInSession);
-        sessionCount = counter / ( papersInSession ) % sessionsInTrack;
+        sessionCount = (counter / ( papersInSession )) % sessionsInTrack;
         papersCount =  counter % papersInSession;
         conference->setPaper(trackCount, sessionCount, papersCount,papers.at(random)); 
         papers.erase(papers.begin() + random);
@@ -119,8 +193,8 @@ void SessionOrganizer::swap( int sessionIndex1, int paperIndex1, int sessionInde
     int sessIndex2 = sessionIndex2 % sessionsInTrack;
     int paper1 = conference->getTrack(trackIndex1).getSession(sessIndex1).getPaper(paperIndex1);
     int paper2 = conference->getTrack(trackIndex2).getSession(sessIndex2).getPaper(paperIndex2);
-    conference->setPaper(trackIndex1, sessionIndex1, paperIndex1,paper2);
-    conference->setPaper(trackIndex2, sessionIndex2, paperIndex2, paper1);
+    conference->setPaper(trackIndex1, sessIndex1, paperIndex1,paper2);
+    conference->setPaper(trackIndex2, sessIndex2, paperIndex2, paper1);
 }
 
 double SessionOrganizer::findGoodness( int sessionIndex1, int paperIndex1, int sessionIndex2, int paperIndex2 )
@@ -149,7 +223,7 @@ double SessionOrganizer::findGoodness( int sessionIndex1, int paperIndex1, int s
 
     if(trackIndex1 == trackIndex2)
     {
-        good += 2 * distanceMatrix[paper1][paper2];
+        good += 2 * tradeoffCoefficient * distanceMatrix[paper1][paper2];
     }
     // cout << " sessionIndex1 : " << sessionIndex1 << " paperIndex1 : "  << paperIndex1 << " sessionIndex2 : " << sessionIndex2 << " paperIndex2 : "  << paperIndex2 << " GOODNESS : " << good << endl ;
     return good;
@@ -181,7 +255,7 @@ double SessionOrganizer::findDistance(int track, int session, int paper, int pap
         {
             for(int i = 0; i < papersInSession; i++)
             {
-                sum += distanceMatrix[paperId][conference->getTrack(track).getSession(j).getPaper(i)];
+                sum += tradeoffCoefficient * distanceMatrix[paperId][conference->getTrack(track).getSession(j).getPaper(i)];
             }
         }
     }
@@ -191,6 +265,7 @@ double SessionOrganizer::findDistance(int track, int session, int paper, int pap
 
 bool SessionOrganizer::findAndUpdateNeighbour ()
 {
+    int numNeighbours = 10;
     int totalSessions = totalTracks * sessionsInTrack;
     int bestNeighbourIndex[4];
     double newGood = 0;
@@ -198,13 +273,27 @@ bool SessionOrganizer::findAndUpdateNeighbour ()
        bestNeighbourIndex[i] = -1;
     }
 
-    for ( int i = 0; i < totalSessions; i++ ){
-        for ( int j = i+1; j < totalSessions; j++ ){
-            for ( int k = 0; k < papersInSession; k++ ){
-                for (int l = 0; l < papersInSession; l++){
-                    double newGoodness = findGoodness(i,k,j,l);
+    // for ( int i = 0; i < totalSessions; i++ ){
+    //     for ( int j = i+1; j < totalSessions; j++ ){
+    //         for ( int k = 0; k < papersInSession; k++ ){
+    //             for (int l = 0; l < papersInSession; l++){
+                    
                     // cout << "New Goodness : " << newGoodness << endl;
+                for(int r = 0; r < numNeighbours; r++)
+                {
+                    
+                    int i = rand() % (totalTracks * sessionsInTrack);
+                    int j = rand() % (totalTracks * sessionsInTrack);
+                    int k = rand() % papersInSession;
+                    while (i == j) { j = rand() % (totalTracks * sessionsInTrack); }
+                    int l = rand() % papersInSession;
+                    // while (j == l) { l = rand() % papersInSession; }
+                    
+                    
+                    double newGoodness = findGoodness(i,k,j,l);
                     swap(i,k,j,l);
+                    
+
                     // cout << "Conference after swap : " ;
                     // conference -> print();
                     // cout << endl;
@@ -220,23 +309,28 @@ bool SessionOrganizer::findAndUpdateNeighbour ()
                     // cout << "Conference after reverse swap : " ;
                     // conference -> print();
                     // cout << endl;
+                    
                 }
-            }
-        }
-    }
+    //         }
+    //     }
+    // }
     if(bestNeighbourIndex[0] != -1)
     {
         swap(bestNeighbourIndex[0], bestNeighbourIndex[1], bestNeighbourIndex[2], bestNeighbourIndex[3]);
         conference->setGoodness(newGood);
+        // cout << " New Good : " << newGood << endl;
        
-        cout << "Best neighbout index : " <<  newGood << endl; 
-        cout << "Next best neighbour : " ;
-        conference -> print();
-        cout << endl ;
+        // cout << "Best neighbout index : " <<  newGood << endl; 
+        // cout << "Next best neighbour : " << endl;
+        // conference -> print();
+        // cout << endl ;
         return true;
     }
     else
+        {
+        // cout << " New Good else : " << newGood << endl;
         return false;
+        }
 }
 
 void SessionOrganizer::readInInputFile ( string filename )
