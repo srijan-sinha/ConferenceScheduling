@@ -84,12 +84,12 @@ public:
     /**
      * Finds the likeliness of a given paper with a given session.
      */
-    double findLikeliness(int track, int session, int paperId);
+    double findLikeliness(int track, int session, int paper, int paperId);
 
     /**
      * Finds the distance of a given paper from a given session.
      */
-    double findDistance(int track, int session, int paperId);
+    double findDistance(int track, int session, int paper, int paperId);
 
 
     /**

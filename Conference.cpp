@@ -92,15 +92,15 @@ void Conference::printConference (char * filename )
 {
     ofstream ofile(filename);
 
-    for ( int i = 0; i < sessionsInTrack; i++ )
+    for ( int i = 0; i < totalTracks; i++ )
     {
-        for ( int j = 0; j < totalTracks; j++ )
+        for ( int j = 0; j < sessionsInTrack; j++ )
         {
             for ( int k = 0; k < papersInSession; k++ )
             {
-                ofile<< tracks[j].getSession ( i ).getPaper ( k ) << " ";
+                ofile<< tracks[i].getSession ( j ).getPaper ( k ) << " ";
             }
-            if ( j != totalTracks - 1 )
+            if ( j != sessionsInTrack - 1 )
             {
                 ofile<<"| ";
             }
@@ -111,4 +111,23 @@ void Conference::printConference (char * filename )
     cout<<"Organization written to ";
     printf("%s :)\n",filename);
 
+}
+
+void Conference::print()
+{
+    for ( int i = 0; i < totalTracks; i++ )
+    {
+        for ( int j = 0; j < sessionsInTrack; j++ )
+        {
+            for ( int k = 0; k < papersInSession; k++ )
+            {
+                cout<< tracks[i].getSession ( j ).getPaper ( k ) << " ";
+            }
+            if ( j != sessionsInTrack - 1 )
+            {
+                cout<<" | ";
+            }
+        }
+        cout << "\n";
+    }
 }
